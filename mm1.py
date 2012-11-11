@@ -43,13 +43,15 @@ height = 450
 width = 450
 max_x = 10			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
 max_y = 10
-h = 0.5
+h = 1
 hr = 2 				# шаг для округления погрешности сложения (втф!!!!!)
 
 c = Canvas(root, height=height, width=width)
 c.create_line(20, height - 20, width - 20, height - 20)
 c.create_line(20, height - 20, 20, 20)
 c.pack()
+drawBounds()
+
 
 # русуем заданную в validatePoint() фигуру и задаем словарь xyt_dict соответствия
 # координаты номеру соответствующего элемента (x, y => t) для использования с матрицой
@@ -64,7 +66,7 @@ while (y <= max_y):
 		if validatePoint(x, y):
 			drawPoint(x, y, "red")
 			xyt_dict[x, y] = t_idx		
-			t_idx = t_idx + 1						
+			t_idx += 1						
 		x = round(x + h, hr)
 	y = round(y + h, hr)
 
@@ -72,16 +74,15 @@ while (y <= max_y):
 n = t_idx						# размер матрицы
 T = range(n)
 for i in range(n):
-	T[i] = range(n)
+	T[i] = range(n + 1)
 
 for i in range(n):
-	for j in range(n):
+	for j in range(n + 1):
 		T[i][j] = 0
 
 print "matrix size: ", n
-#printMatrix(T)
-rowCount = 0
 
+rowCount = 0
 x = 0.0
 y = 0.0
 while (y <= max_y):
@@ -104,19 +105,76 @@ while (y <= max_y):
 			t_right   = xyt_dict[right_n, y]
 			t_top     = xyt_dict[x, top_n]
 			t_bottom  = xyt_dict[x, bottom_n]
-			T[rowCount, t_left] = 1
-			T[rowCount, t_current] = -4
-			T[rowCount, t_right] = 1
-			T[rowCount, t_bottom] = 1
-			T[rowCount, t_top] = 1
-			rowCount = rowCount + 1
-			
-
+			T[rowCount][t_left] = 1 			# тут задаем коэффициенты из разностного уравнения
+			T[rowCount][t_current] = -4
+			T[rowCount][t_right] = 1
+			T[rowCount][t_bottom] = 1
+			T[rowCount][t_top] = 1
+			rowCount += 1
 		x = round(x + h, hr)
 	y = round(y + h, hr)
 
+temperatureInPoint = {}
+# задаем граничные условия с левой стороны фигуры
+x = 0.0
+y = 0.0
+while (y <= max_y):
+	x = 0.0
+	while (x <= max_x):
+		if validatePoint(x, y):
+			t_border = xyt_dict[x, y]
+			temperatureInPoint[t_border] = 200
+			break						
+		x = round(x + h, hr)
+	y = round(y + h, hr)
+
+# задаем граничные условия с правой стороны фигуры
+x = max_x
+y = 0.0
+while (y <= max_y):
+	x = max_x
+	while (x >= 0):
+		if validatePoint(x, y):
+			t_border = xyt_dict[x, y]
+			temperatureInPoint[t_border] = 100
+			break						
+		x = round(x - h, hr)
+	y = round(y + h, hr)
 
 
+# задаем граничные условия с нижней стороны фигуры
+x = 0.0
+y = 0.0
+while (x <= max_x):
+	y = 0.0
+	while (y <= max_y):
+		if validatePoint(x, y):
+			t_border = xyt_dict[x, y]
+			temperatureInPoint[t_border] = 50
+			break						
+		y = round(y + h, hr)
+	x = round(x + h, hr)
 
-drawBounds()
+# задаем граничные условия с верхней стороны фигуры
+x = 0.0
+y = max_y
+while (x <= max_x):
+	y = max_y
+	while (y >= 0):
+		if validatePoint(x, y):
+			t_border = xyt_dict[x, y]
+			temperatureInPoint[t_border] = 100
+			break						
+		y = round(y - h, hr)
+	x = round(x + h, hr)
+
+
+# задаем температуры точек в матрице
+for point in temperatureInPoint:
+	T[rowCount][point] = 1
+	T[rowCount][n] = temperatureInPoint[point]
+	rowCount += 1
+
+printMatrix(T)
+
 mainloop()
