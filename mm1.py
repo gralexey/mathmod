@@ -15,6 +15,13 @@ def drawPoint(x, y, color):
 	y_p = height - 20 - y
 	c.create_rectangle(x_p, y_p, x_p, y_p, outline=color)
 
+def drawCircle(x, y, radius, color):	
+	x = x * 40			# масштабирование
+	y = y * 40
+	x_p = 20 + x
+	y_p = height - 20 - y
+	c.create_oval(x_p - radius, y_p - radius, x_p + radius, y_p + radius, outline=color, fill=color)
+
 def drawBoldPoint(x, y, color):	
 	x = x * 40			# масштабирование
 	y = y * 40
@@ -32,9 +39,11 @@ def drawBounds():				# рисуем границы для рабочего пр�
 		drawPoint(max_x, y, "green")
 		y = y + 0.1
 
-def printMatrix(matrix):
-	for row in matrix:
-		print row
+def printMatrix(a, b):
+	idx = 0
+	for row in a:
+		print row, b[idx]
+		idx += 1
 
 root = Tk()
 root.title('Model')
@@ -43,7 +52,7 @@ height = 450
 width = 450
 max_x = 10			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
 max_y = 10
-h = 1
+h = 0.5
 hr = 2 				# шаг для округления погрешности сложения (втф!!!!!)
 
 c = Canvas(root, height=height, width=width)
@@ -74,11 +83,16 @@ while (y <= max_y):
 n = t_idx						# размер матрицы
 T = range(n)
 for i in range(n):
-	T[i] = range(n + 1)
+	T[i] = range(n)
 
 for i in range(n):
-	for j in range(n + 1):
+	for j in range(n):
 		T[i][j] = 0
+
+
+F = range(n)
+for i in range(n):
+	F[i] = 0
 
 print "matrix size: ", n
 
@@ -169,12 +183,29 @@ while (x <= max_x):
 	x = round(x + h, hr)
 
 
-# задаем температуры точек в матрице
+# задаем температуры точек в матрице 
 for point in temperatureInPoint:
 	T[rowCount][point] = 1
-	T[rowCount][n] = temperatureInPoint[point]
+	F[rowCount] = temperatureInPoint[point]
 	rowCount += 1
 
-printMatrix(T)
+printMatrix(T, F)
+
+import numpy
+t = numpy.linalg.solve(T, F)
+print t
+
+#for xy in xyt_dict:
+#	print xy, xyt_dict[xy]
+
+temp = xyt_dict.items()
+for item in temp:
+	pointXY = item[0]	
+	pointIdx = item[1]	
+	tOfPoint = t[pointIdx]
+	print pointXY, pointIdx, tOfPoint
+	temperatureRadius = tOfPoint * 10 / 200.0
+	drawCircle(pointXY[0], pointXY[1], temperatureRadius, "red")
+
 
 mainloop()
