@@ -117,7 +117,7 @@ max_x = 10			# определяет рабочий прямоугольник д
 max_y = 10
 h = 0.5
 hr = 2 				# шаг для округления погрешности сложения (втф!!!)
-ht = 1.0			# шаг времени
+ht = 0.2			# шаг времени
 a = 1.0				# коэффициенты дифференциального уравнения
 b = 1.0				
 
@@ -168,7 +168,7 @@ tStore.append(tOfCurrentIterations)
 def doLoop():
 	time = 0.0
 	iteration_n = 0     # номер итерации (как time, только целое число)
-	while (time <= 25):
+	while (time <= 5):
 		rowCount = 0
 		x = 0.0
 		y = 0.0
@@ -226,11 +226,16 @@ def doLoop():
 			drawCircle(pointXY[0], pointXY[1], temperatureRadius, "red")
 
 		time += ht
-		print iteration_n, " finished"
+		#print iteration_n, " finished"
 		sleep(0.1)
 		root.update()
+		print tStore[iteration_n], " ", iteration_n, " finished"		
 		iteration_n += 1
+
+	for i in range(10):
+		drawCircle(10, i/2.0, i/0.8, "brown")
 
 goButton = Button (root, text="Modulate", command=doLoop)
 goButton.pack()
+
 mainloop()
