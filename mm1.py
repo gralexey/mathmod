@@ -2,6 +2,8 @@
 
 from Tkinter import *
 from math import sqrt
+from numpy import linalg
+from time import sleep
 
 def validatePoint(x, y):		# возвращает true, если точка принадлежит области, определенной неравенствами 
 	if (x >= 0 and y >=0 and x <= 8 and y <= 6 and ((x - 5)**2 + (y - 3)**2 <= 3**2 or x <= 5 or y <= 3)):
@@ -45,6 +47,7 @@ def printMatrix(a, b):
 		print row, b[idx]
 		idx += 1
 
+temperatureIn_t_idx = {}
 def defineTopCondiments():
 	# задаем граничные условия с верхней стороны фигуры
 	x = 0.0
@@ -54,7 +57,8 @@ def defineTopCondiments():
 		while (y >= 0):
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
-				temperatureInPoint[t_border] = 100
+				global temperatureIn_t_idx
+				temperatureIn_t_idx[t_border] = 100
 				break						
 			y = round(y - h, hr)
 		x = round(x + h, hr)
@@ -68,7 +72,8 @@ def defineBottomCondiments():
 		while (y <= max_y):
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
-				temperatureInPoint[t_border] = 50
+				global temperatureIn_t_idx
+				temperatureIn_t_idx[t_border] = 50
 				break						
 			y = round(y + h, hr)
 		x = round(x + h, hr)
@@ -82,7 +87,8 @@ def defineRightCondiments():
 		while (x >= 0):
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
-				temperatureInPoint[t_border] = 100
+				global temperatureIn_t_idx
+				temperatureIn_t_idx[t_border] = 100
 				break						
 			x = round(x - h, hr)
 		y = round(y + h, hr)
@@ -96,7 +102,8 @@ def defineLeftCondiments():
 		while (x <= max_x):
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
-				temperatureInPoint[t_border] = 200
+				global temperatureIn_t_idx
+				temperatureIn_t_idx[t_border] = 200
 				break						
 			x = round(x + h, hr)
 		y = round(y + h, hr)
@@ -109,14 +116,16 @@ width = 450
 max_x = 10			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
 max_y = 10
 h = 0.5
-hr = 2 				# шаг для округления погрешности сложения (втф!!!!!)
+hr = 2 				# шаг для округления погрешности сложения (втф!!!)
+ht = 1.0			# шаг времени
+a = 1.0				# коэффициенты дифференциального уравнения
+b = 1.0				
 
 c = Canvas(root, height=height, width=width)
 c.create_line(20, height - 20, width - 20, height - 20)
 c.create_line(20, height - 20, 20, 20)
 c.pack()
 drawBounds()
-
 
 # русуем заданную в validatePoint() фигуру и задаем словарь xyt_dict соответствия
 # координаты номеру соответствующего элемента (x, y => t) для использования с матрицой
@@ -151,71 +160,77 @@ for i in range(n):
 	F[i] = 0
 
 print "matrix size: ", n
-tStore = array('f', 0)
-print tStore
+tOfCurrentIterations = [0.0] * n 		# 0.0 — начальная температура во всех точках
+tStore = []
+tStore.append(tOfCurrentIterations)
+#print tStore
 
-rowCount = 0
-x = 0.0
-y = 0.0
-while (y <= max_y):
-	x = 0.0
-	while (x <= max_x):		
-	# x, y  - координаты текущей точки, проверяемой на наличие соседей (для возможности вычислить 2-ю производную)
-		left_n = round(x - h, hr)
-		right_n = round(x + h, hr)
-		top_n = round(y + h, hr)
-		bottom_n = round(y - h, hr)
-		if (
-			(left_n, y)   in xyt_dict and
-			(right_n, y)  in xyt_dict and
-			(x, top_n)    in xyt_dict and
-			(x, bottom_n) in xyt_dict
-		   ):
-			drawPoint(x , y, "blue")			# для синенькой точки можно посчитать производную
-			t_current = xyt_dict[x, y]			# индексы текущей точки и прилежащих
-			t_left    = xyt_dict[left_n, y]
-			t_right   = xyt_dict[right_n, y]
-			t_top     = xyt_dict[x, top_n]
-			t_bottom  = xyt_dict[x, bottom_n]
-			T[rowCount][t_left] = 1 			# тут задаем коэффициенты из разностного уравнения
-			T[rowCount][t_current] = -4
-			T[rowCount][t_right] = 1
-			T[rowCount][t_bottom] = 1
-			T[rowCount][t_top] = 1
+def doLoop():
+	time = 0.0
+	iteration_n = 0     # номер итерации (как time, только целое число)
+	while (time <= 25):
+		rowCount = 0
+		x = 0.0
+		y = 0.0
+		while (y <= max_y):
+			x = 0.0
+			while (x <= max_x):		
+			# x, y  - координаты текущей точки, проверяемой на наличие соседей (для возможности вычислить 2-ю производную)
+				left_n = round(x - h, hr)
+				right_n = round(x + h, hr)
+				top_n = round(y + h, hr)
+				bottom_n = round(y - h, hr)
+				if (
+					(left_n, y)   in xyt_dict and
+					(right_n, y)  in xyt_dict and
+					(x, top_n)    in xyt_dict and
+					(x, bottom_n) in xyt_dict
+				   ):
+					drawPoint(x , y, "blue")			# для синенькой точки можно посчитать производную
+					t_current = xyt_dict[x, y]			# индексы текущей точки и прилежащих
+					t_left    = xyt_dict[left_n, y]
+					t_right   = xyt_dict[right_n, y]
+					t_top     = xyt_dict[x, top_n]
+					t_bottom  = xyt_dict[x, bottom_n]
+					T[rowCount][t_left] = -(a*ht) 			# тут задаем коэффициенты из разностного уравнения
+					T[rowCount][t_current] = h**2 + 2*a*ht + 2*b*ht
+					T[rowCount][t_right] = -(a*ht)
+					T[rowCount][t_bottom] = -(b*ht)
+					T[rowCount][t_top] = -(b*ht)
+					F[rowCount] = h**2 * tStore[iteration_n][t_current]
+					rowCount += 1
+				x = round(x + h, hr)
+			y = round(y + h, hr)
+
+		defineLeftCondiments()
+		defineRightCondiments()
+		defineBottomCondiments()
+		defineTopCondiments()
+
+		# задаем граничные температуры точек в матрице 
+		for idx in temperatureIn_t_idx:
+			T[rowCount][idx] = 1
+			F[rowCount] = temperatureIn_t_idx[idx]
 			rowCount += 1
-		x = round(x + h, hr)
-	y = round(y + h, hr)
 
-temperatureInPoint = {}
+		t = linalg.solve(T, F)		# t содержит значения температур элементов (последовательно)
+		tStore.append(t)
 
+		c.delete(ALL)
+		xyts = xyt_dict.items()
+		for xyt in xyts:
+			pointXY = xyt[0]	
+			t_Idx = xyt[1]	
+			tOfPoint = t[t_Idx]
+			temperatureRadius = tOfPoint * 10.0 / 200.0
+			drawCircle(pointXY[0], pointXY[1], temperatureRadius, "red")
 
-defineLeftCondiments()
-defineRightCondiments()
-defineBottomCondiments()
-defineTopCondiments()
+		time += ht
+		print iteration_n, " finished"
+		sleep(0.1)
+		root.update()
+		iteration_n += 1
 
-# задаем температуры точек в матрице 
-for point in temperatureInPoint:
-	T[rowCount][point] = 1
-	F[rowCount] = temperatureInPoint[point]
-	rowCount += 1
-
-#printMatrix(T, F)
-
-import numpy
-t = numpy.linalg.solve(T, F)		# t содержит значения температур элементов (последовательно)
-#print t
-
-
-
-temp = xyt_dict.items()
-for item in temp:
-	pointXY = item[0]	
-	t_Idx = item[1]	
-	tOfPoint = t[t_Idx]
-	#print pointXY, t_Idx, tOfPoint
-	temperatureRadius = tOfPoint * 10.0 / 200.0
-	drawCircle(pointXY[0], pointXY[1], temperatureRadius, "red")
-
-
+goButton = Button (root, text="Modulate", command=doLoop)
+goButton.pack()
 mainloop()
