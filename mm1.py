@@ -45,6 +45,62 @@ def printMatrix(a, b):
 		print row, b[idx]
 		idx += 1
 
+def defineTopCondiments():
+	# задаем граничные условия с верхней стороны фигуры
+	x = 0.0
+	y = max_y
+	while (x <= max_x):
+		y = max_y
+		while (y >= 0):
+			if validatePoint(x, y):
+				t_border = xyt_dict[x, y]
+				temperatureInPoint[t_border] = 100
+				break						
+			y = round(y - h, hr)
+		x = round(x + h, hr)
+
+def defineBottomCondiments():
+	# задаем граничные условия с нижней стороны фигуры
+	x = 0.0
+	y = 0.0
+	while (x <= max_x):
+		y = 0.0
+		while (y <= max_y):
+			if validatePoint(x, y):
+				t_border = xyt_dict[x, y]
+				temperatureInPoint[t_border] = 50
+				break						
+			y = round(y + h, hr)
+		x = round(x + h, hr)
+
+def defineRightCondiments():
+	# задаем граничные условия с правой стороны фигуры
+	x = max_x
+	y = 0.0
+	while (y <= max_y):
+		x = max_x
+		while (x >= 0):
+			if validatePoint(x, y):
+				t_border = xyt_dict[x, y]
+				temperatureInPoint[t_border] = 100
+				break						
+			x = round(x - h, hr)
+		y = round(y + h, hr)
+
+def defineLeftCondiments():
+	# задаем граничные условия с левой стороны фигуры
+	x = 0.0
+	y = 0.0
+	while (y <= max_y):
+		x = 0.0
+		while (x <= max_x):
+			if validatePoint(x, y):
+				t_border = xyt_dict[x, y]
+				temperatureInPoint[t_border] = 200
+				break						
+			x = round(x + h, hr)
+		y = round(y + h, hr)
+
 root = Tk()
 root.title('Model')
 
@@ -129,59 +185,12 @@ while (y <= max_y):
 	y = round(y + h, hr)
 
 temperatureInPoint = {}
-# задаем граничные условия с левой стороны фигуры
-x = 0.0
-y = 0.0
-while (y <= max_y):
-	x = 0.0
-	while (x <= max_x):
-		if validatePoint(x, y):
-			t_border = xyt_dict[x, y]
-			temperatureInPoint[t_border] = 200
-			break						
-		x = round(x + h, hr)
-	y = round(y + h, hr)
-
-# задаем граничные условия с правой стороны фигуры
-x = max_x
-y = 0.0
-while (y <= max_y):
-	x = max_x
-	while (x >= 0):
-		if validatePoint(x, y):
-			t_border = xyt_dict[x, y]
-			temperatureInPoint[t_border] = 100
-			break						
-		x = round(x - h, hr)
-	y = round(y + h, hr)
 
 
-# задаем граничные условия с нижней стороны фигуры
-x = 0.0
-y = 0.0
-while (x <= max_x):
-	y = 0.0
-	while (y <= max_y):
-		if validatePoint(x, y):
-			t_border = xyt_dict[x, y]
-			temperatureInPoint[t_border] = 50
-			break						
-		y = round(y + h, hr)
-	x = round(x + h, hr)
-
-# задаем граничные условия с верхней стороны фигуры
-x = 0.0
-y = max_y
-while (x <= max_x):
-	y = max_y
-	while (y >= 0):
-		if validatePoint(x, y):
-			t_border = xyt_dict[x, y]
-			temperatureInPoint[t_border] = 100
-			break						
-		y = round(y - h, hr)
-	x = round(x + h, hr)
-
+defineLeftCondiments()
+defineRightCondiments()
+defineBottomCondiments()
+defineTopCondiments()
 
 # задаем температуры точек в матрице 
 for point in temperatureInPoint:
@@ -189,22 +198,21 @@ for point in temperatureInPoint:
 	F[rowCount] = temperatureInPoint[point]
 	rowCount += 1
 
-printMatrix(T, F)
+#printMatrix(T, F)
 
 import numpy
-t = numpy.linalg.solve(T, F)
+t = numpy.linalg.solve(T, F)		# t содержит значения температур элементов (последовательно)
 print t
 
-#for xy in xyt_dict:
-#	print xy, xyt_dict[xy]
+
 
 temp = xyt_dict.items()
 for item in temp:
 	pointXY = item[0]	
-	pointIdx = item[1]	
-	tOfPoint = t[pointIdx]
-	print pointXY, pointIdx, tOfPoint
-	temperatureRadius = tOfPoint * 10 / 200.0
+	t_Idx = item[1]	
+	tOfPoint = t[t_Idx]
+	#print pointXY, t_Idx, tOfPoint
+	temperatureRadius = tOfPoint * 10.0 / 200.0
 	drawCircle(pointXY[0], pointXY[1], temperatureRadius, "red")
 
 
