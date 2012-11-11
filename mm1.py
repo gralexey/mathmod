@@ -22,8 +22,10 @@ def drawCircle(x, y, temperature, color):
 	y = y * 40
 	x_p = 20 + x
 	y_p = height - 20 - y
-	color = "#%06x" % int(temperature * (16711680 - 255) / (200 - 0) + 255)
-	radius = 10
+	#color = "#%06x" % int(temperature * (16711680 - 255) / (200 - 0) + 255)
+	#color = color[:3] + "00" + color[5:]
+	#radius = h * 10
+	radius = temperature * h * 20 / 200
 	c.create_oval(x_p - radius, y_p - radius, x_p + radius, y_p + radius, outline=color, fill=color)
 
 def drawBoldPoint(x, y, color):	
@@ -113,13 +115,14 @@ def defineLeftCondiments():
 root = Tk()
 root.title('Model')
 
+# настройки
 height = 450
 width = 450
 max_x = 10			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
 max_y = 10
 h = 0.2
 hr = 2 				# шаг для округления погрешности сложения (втф!!!)
-ht = 0.2			# шаг времени
+ht = 0.5			# шаг времени
 a = 1.0				# коэффициенты дифференциального уравнения
 b = 1.0				
 
