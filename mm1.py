@@ -151,6 +151,8 @@ for i in range(n):
 	F[i] = 0
 
 print "matrix size: ", n
+tStore = array('f', 0)
+print tStore
 
 rowCount = 0
 x = 0.0
@@ -202,7 +204,7 @@ for point in temperatureInPoint:
 
 import numpy
 t = numpy.linalg.solve(T, F)		# t содержит значения температур элементов (последовательно)
-print t
+#print t
 
 
 
