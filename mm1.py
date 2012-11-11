@@ -78,9 +78,9 @@ for i in range(n):
 	for j in range(n):
 		T[i][j] = 0
 
+print "matrix size: ", n
 #printMatrix(T)
-
-print t_idx
+rowCount = 0
 
 x = 0.0
 y = 0.0
@@ -104,6 +104,12 @@ while (y <= max_y):
 			t_right   = xyt_dict[right_n, y]
 			t_top     = xyt_dict[x, top_n]
 			t_bottom  = xyt_dict[x, bottom_n]
+			T[rowCount, t_left] = 1
+			T[rowCount, t_current] = -4
+			T[rowCount, t_right] = 1
+			T[rowCount, t_bottom] = 1
+			T[rowCount, t_top] = 1
+			rowCount = rowCount + 1
 			
 
 		x = round(x + h, hr)
