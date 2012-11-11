@@ -4,7 +4,7 @@ from Tkinter import *
 from math import sqrt
 
 def validatePoint(x, y):		# возвращает true, если точка принадлежит области, определенной неравенствами 
-	if (x >= 0 and y >=0 and x <= 8 and y <= 5 and y <= sqrt(-x + 8)):
+	if (x >= 0 and y >=0 and x <= 8 and y <= 6 and ((x - 5)**2 + (y - 3)**2 <= 3**2 or x <= 5 or y <= 3)):
 		return True
 	return False
 
@@ -33,7 +33,7 @@ height = 450
 width = 450
 max_x = 10			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
 max_y = 10
-h = 0.5
+h = 0.1
 
 c = Canvas(root, height=height, width=width)
 c.create_line(20, height - 20, width - 20, height - 20)
@@ -45,7 +45,8 @@ y = 0.0
 while (y <= max_y):
 	x = 0.0
 	while (x <= max_x):
-		drawPoint(x, y, "red")
+		if validatePoint(x, y):
+			drawPoint(x, y, "red")
 		x = x + h
 	y = y + h
 
