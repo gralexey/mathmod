@@ -12,30 +12,30 @@ def validatePoint(x, y):		# возвращает true, если точка пр�
 
 def drawPoint(x, y, color):	
 	x = x * scale_k			# масштабирование
-	y = y * 40
+	y = y * scale_k
 	x_p = 20 + x
 	y_p = height - 20 - y	
 	c.create_rectangle(x_p, y_p, x_p, y_p, outline=color)
 
 def drawCircle(x, y, temperature, color):	
-	x = x * 40			# масштабирование
-	y = y * 40
+	x = x * scale_k			# масштабирование
+	y = y * scale_k
 	x_p = 20 + x
 	y_p = height - 20 - y
 	#color = "#%06x" % int(temperature * (16711680 - 255) / (200 - 0) + 255)
 	#color = color[:3] + "00" + color[5:]
 	#radius = h * 10
-	radius = temperature * h * 20 / 200
+	radius = temperature * h * 35 / 200
 	c.create_oval(x_p - radius, y_p - radius, x_p + radius, y_p + radius, outline=color, fill=color)
 
 def drawBoldPoint(x, y, color):	
-	x = x * 40			# масштабирование
-	y = y * 40
+	x = x * scale_k			# масштабирование
+	y = y * scale_k
 	x_p = 20 + x
 	y_p = height - 20 - y
 	c.create_rectangle(x_p - 3, y_p - 3, x_p +3 , y_p + 3, outline=color, fill=color)
 
-def drawBounds():				# рисуем границы для рабочего прямоугольника (0, 0, max_x, max_y)
+def drawBounds():				# рисуем границы для рабочего прямоугольника (0, 0, max_x, max_y) и координатные оси
 	x = 0.0
 	while (x <= max_x):
 		drawPoint(x, max_y, "green")
@@ -44,6 +44,9 @@ def drawBounds():				# рисуем границы для рабочего пр�
 	while (y <= max_y):
 		drawPoint(max_x, y, "green")
 		y = y + 0.1
+	c.create_line(20, height - 20, width - 20, height - 20)
+	c.create_line(20, height - 20, 20, 20)
+	print "printed bounds"
 
 def printMatrix(a, b):
 	idx = 0
@@ -77,7 +80,7 @@ def defineBottomCondiments():
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 50
+				temperatureIn_t_idx[t_border] = 0 # 50
 				break						
 			y = round(y + h, hr)
 		x = round(x + h, hr)
@@ -116,20 +119,18 @@ root = Tk()
 root.title('Model')
 
 # настройки
-height = 450
-width = 450
+height = 650
+width = 650
 max_x = 10			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
 max_y = 10
 h = 0.2
 hr = 2 				# шаг для округления погрешности сложения (втф!!!)
-ht = 0.5			# шаг времени
+ht = 0.4			# шаг времени
 a = 1.0				# коэффициенты дифференциального уравнения
 b = 1.0				
-scale_k = 40
+scale_k = 60
 
 c = Canvas(root, height=height, width=width)
-c.create_line(20, height - 20, width - 20, height - 20)
-c.create_line(20, height - 20, 20, 20)
 c.pack()
 drawBounds()
 
@@ -174,7 +175,7 @@ tStore.append(tOfCurrentIterations)
 def doLoop():
 	time = 0.0
 	iteration_n = 0     # номер итерации (как time, только целое число)
-	while (time <= 10):
+	while (time <= 15):
 		rowCount = 0
 		x = 0.0
 		y = 0.0
@@ -208,10 +209,10 @@ def doLoop():
 				x = round(x + h, hr)
 			y = round(y + h, hr)
 
-		defineLeftCondiments()
 		defineRightCondiments()
 		defineBottomCondiments()
 		defineTopCondiments()
+		defineLeftCondiments()
 
 		# задаем граничные температуры точек в матрице 
 		for idx in temperatureIn_t_idx:
@@ -223,12 +224,12 @@ def doLoop():
 		tStore.append(t)
 
 		c.delete(ALL)
+		drawBounds()
 		xyts = xyt_dict.items()
 		for xyt in xyts:
 			pointXY = xyt[0]	
 			t_Idx = xyt[1]	
 			tOfPoint = t[t_Idx]
-			#temperatureRadius = tOfPoint * 5.0 / 200.0
 			drawCircle(pointXY[0], pointXY[1], tOfPoint, "red")
 
 		time += ht
