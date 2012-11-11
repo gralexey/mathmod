@@ -17,14 +17,13 @@ def drawPoint(x, y, color):
 	y_p = height - 20 - y	
 	c.create_rectangle(x_p, y_p, x_p, y_p, outline=color)
 
-def drawCircle(x, y, radius, color):	
+def drawCircle(x, y, temperature, color):	
 	x = x * 40			# масштабирование
 	y = y * 40
 	x_p = 20 + x
 	y_p = height - 20 - y
-	max_color = 30			# max_color — самый яркий
-	radius * (16711680 - 255) / (200 - 0) + 255
-	color = "#%06x" % int(radius * (16711680 - 255) / (200 - 0) + 255)
+	color = "#%06x" % int(temperature * (16711680 - 255) / (200 - 0) + 255)
+	radius = 10
 	c.create_oval(x_p - radius, y_p - radius, x_p + radius, y_p + radius, outline=color, fill=color)
 
 def drawBoldPoint(x, y, color):	
