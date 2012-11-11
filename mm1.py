@@ -115,7 +115,7 @@ height = 450
 width = 450
 max_x = 10			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
 max_y = 10
-h = 0.5
+h = 0.2
 hr = 2 				# шаг для округления погрешности сложения (втф!!!)
 ht = 0.2			# шаг времени
 a = 1.0				# коэффициенты дифференциального уравнения
@@ -222,14 +222,14 @@ def doLoop():
 			pointXY = xyt[0]	
 			t_Idx = xyt[1]	
 			tOfPoint = t[t_Idx]
-			temperatureRadius = tOfPoint * 10.0 / 200.0
+			temperatureRadius = tOfPoint * 5.0 / 200.0
 			drawCircle(pointXY[0], pointXY[1], temperatureRadius, "red")
 
 		time += ht
 		#print iteration_n, " finished"
 		sleep(0.1)
 		root.update()
-		print tStore[iteration_n], " ", iteration_n, " finished"		
+		#print tStore[iteration_n], " ", iteration_n, " finished"		
 		iteration_n += 1
 
 	for i in range(10):
