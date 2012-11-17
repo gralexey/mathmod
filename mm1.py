@@ -26,7 +26,7 @@ def drawCircle(x, y, temperature, color):
 	#color = color[:3] + "00" + color[5:]
 	#radius = h * 10
 	radius = temperature * h * 35 / 200
-	c.create_oval(x_p - radius, y_p - radius, x_p + radius, y_p + radius, outline=color, fill=color)
+	c.create_rectangle(x_p - radius, y_p - radius, x_p + radius, y_p + radius, outline=color, fill=color)
 
 def drawBoldPoint(x, y, color):	
 	x = x * scale_k			# масштабирование
@@ -128,11 +128,30 @@ hr = 2 				# шаг для округления погрешности слож�
 ht = 0.4			# шаг времени
 a = 1.0				# коэффициенты дифференциального уравнения
 b = 1.0				
-scale_k = 80
+scale_k = 60
 
 c = Canvas(root, height=height, width=width)
 c.pack()
 drawBounds()
+
+
+def getColorByScalar(temperature):
+	temperature = int(temperature)	
+	interval = temperature / 34														# номер интервала из цветовой шкалы: при изменении "температуры" от 0 до 100, мы прходим интервалы #00ffff - #00ff00 - #ffff00 - #ff0000							
+	offsetFromInterval = temperature - interval * 33								# смещение от начала интервала
+	if interval == 0:
+		color = "#00ff%02x" % (255 - offsetFromInterval * 255 / 33)
+	if interval == 1:
+		color = "#%02xff00" % (offsetFromInterval * 255 / 33 - 7)
+	if interval == 2:
+		color = "#ff%02x00" % (255 - offsetFromInterval * 255 / 33)
+	return color
+
+for i in range(100):
+	x1 = i * 5
+	x2 = i * 5 + 5
+	color = getColorByScalar(i)
+	c.create_rectangle(x1 + 50, 30, x2 + 50, 50, fill=color, width=0)
 
 # русуем заданную в validatePoint() фигуру и задаем словарь xyt_dict соответствия
 # координаты номеру соответствующего элемента (x, y => t) для использования с матрицой
@@ -230,7 +249,7 @@ def doLoop():
 			pointXY = xyt[0]	
 			t_Idx = xyt[1]	
 			tOfPoint = t[t_Idx]
-			drawCircle(pointXY[0], pointXY[1], tOfPoint, "red")
+			drawCircle(pointXY[0], pointXY[1], scale_k * 2, getColorByScalar(tOfPoint * 100 / 200))
 
 		time += ht
 		#print iteration_n, " finished"
