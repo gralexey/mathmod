@@ -46,7 +46,6 @@ def drawBounds():				# рисуем границы для рабочего пр�
 		y = y + 0.1
 	c.create_line(20, height - 20, width - 20, height - 20)
 	c.create_line(20, height - 20, 20, 20)
-	print "printed bounds"
 
 def printMatrix(a, b):
 	idx = 0
@@ -136,7 +135,7 @@ drawBounds()
 
 
 def getColorByScalar(temperature):
-	#temperature = temperature * 0.66 + 33
+	#temperature = temperature * 0.66 + 33				# для сужения цветового диапазона
 	temperature = int(temperature)
 	if temperature == 100:
 		temperature	-= 1
@@ -150,11 +149,11 @@ def getColorByScalar(temperature):
 		color = "#ff%02x00" % (255 - offsetFromInterval * 255 / 33)
 	return color
 
-for i in range(100):
-	x1 = i * 5
-	x2 = i * 5 + 5
-	color = getColorByScalar(i)
-	c.create_rectangle(x1 + 50, 30, x2 + 50, 50, fill=color, width=0)
+#for i in range(100):			# вывести цветовую гамму
+#	x1 = i * 5
+#	x2 = i * 5 + 5
+#	color = getColorByScalar(i)
+#	c.create_rectangle(x1 + 50, 30, x2 + 50, 50, fill=color, width=0)
 
 # русуем заданную в validatePoint() фигуру и задаем словарь xyt_dict соответствия
 # координаты номеру соответствующего элемента (x, y => t) для использования с матрицой
@@ -197,7 +196,7 @@ tStore.append(tOfCurrentIterations)
 def doLoop():
 	time = 0.0
 	iteration_n = 0     # номер итерации (как time, только целое число)
-	while (time <= 15):
+	while (time <= 25):
 		rowCount = 0
 		x = 0.0
 		y = 0.0
