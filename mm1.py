@@ -26,7 +26,7 @@ def drawCircle(x, y, temperature, color):
 	#color = color[:3] + "00" + color[5:]
 	#radius = h * 10
 	radius = temperature * h * 35 / 200
-	c.create_rectangle(x_p - radius, y_p - radius, x_p + radius, y_p + radius, outline=color, fill=color)
+	c.create_rectangle(x_p - radius, y_p - radius, x_p + radius, y_p + radius, fill=color, width=0)
 
 def drawBoldPoint(x, y, color):	
 	x = x * scale_k			# масштабирование
@@ -125,7 +125,7 @@ max_x = 10			# определяет рабочий прямоугольник д
 max_y = 10
 h = 0.2
 hr = 2 				# шаг для округления погрешности сложения (втф!!!)
-ht = 0.4			# шаг времени
+ht = 1.0			# шаг времени
 a = 1.0				# коэффициенты дифференциального уравнения
 b = 1.0				
 scale_k = 60
@@ -136,6 +136,7 @@ drawBounds()
 
 
 def getColorByScalar(temperature):
+	#temperature = temperature * 0.66 + 33
 	temperature = int(temperature)
 	if temperature == 100:
 		temperature	-= 1
@@ -251,7 +252,7 @@ def doLoop():
 			pointXY = xyt[0]	
 			t_Idx = xyt[1]	
 			tOfPoint = t[t_Idx]
-			drawCircle(pointXY[0], pointXY[1], scale_k * 2, getColorByScalar(tOfPoint * 100 / 200))
+			drawCircle(pointXY[0], pointXY[1], scale_k * 2 + 40, getColorByScalar(tOfPoint * 100 / 200))
 
 		time += ht
 		#print iteration_n, " finished"
