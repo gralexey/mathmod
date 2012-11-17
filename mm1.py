@@ -136,7 +136,9 @@ drawBounds()
 
 
 def getColorByScalar(temperature):
-	temperature = int(temperature)	
+	temperature = int(temperature)
+	if temperature == 100:
+		temperature	-= 1
 	interval = temperature / 34														# номер интервала из цветовой шкалы: при изменении "температуры" от 0 до 100, мы прходим интервалы #00ffff - #00ff00 - #ffff00 - #ff0000							
 	offsetFromInterval = temperature - interval * 33								# смещение от начала интервала
 	if interval == 0:
