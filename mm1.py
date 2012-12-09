@@ -6,7 +6,7 @@ from numpy import linalg
 from time import sleep
 
 def validatePoint(x, y):		# возвращает true, если точка принадлежит области, определенной неравенствами 
-	if (x >= 0 and y >=0 and x <= 8 and y <= 6 and ((x - 5)**2 + (y - 3)**2 <= 3**2 or x <= 5 or y <= 3)):
+	if (y <= x and y >= 0 and y <= -x + 8.1):
 		return True
 	return False
 
@@ -79,7 +79,7 @@ def defineBottomCondiments():
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 0 # 50
+				temperatureIn_t_idx[t_border] = 50
 				break						
 			y = round(y + h, hr)
 		x = round(x + h, hr)
@@ -134,13 +134,15 @@ c.pack()
 drawBounds()
 
 
-def getColorByScalar(temperature):
+def getColorByScalar(temperature):	
+	#temperature = (temperature - 50) * 2
 	#temperature = temperature * 0.66 + 33				# для сужения цветового диапазона
 	temperature = int(temperature)
 	if temperature == 100:
 		temperature	-= 1
 	interval = temperature / 34														# номер интервала из цветовой шкалы: при изменении "температуры" от 0 до 100, мы прходим интервалы #00ffff - #00ff00 - #ffff00 - #ff0000							
 	offsetFromInterval = temperature - interval * 33								# смещение от начала интервала
+	color = "#00ffff"
 	if interval == 0:
 		color = "#00ff%02x" % (255 - offsetFromInterval * 255 / 33)
 	if interval == 1:
@@ -230,10 +232,10 @@ def doLoop():
 				x = round(x + h, hr)
 			y = round(y + h, hr)
 
-		defineRightCondiments()
+		#defineRightCondiments()
 		defineBottomCondiments()
 		defineTopCondiments()
-		defineLeftCondiments()
+		#defineLeftCondiments()
 
 		# задаем граничные температуры точек в матрице 
 		for idx in temperatureIn_t_idx:
@@ -251,7 +253,8 @@ def doLoop():
 			pointXY = xyt[0]	
 			t_Idx = xyt[1]	
 			tOfPoint = t[t_Idx]
-			drawCircle(pointXY[0], pointXY[1], scale_k * 2 + 40, getColorByScalar(tOfPoint * 100 / 200))
+			tOfPoint = (tOfPoint - 50) * 2
+			drawCircle(pointXY[0], pointXY[1], scale_k * 2 + 40, getColorByScalar(tOfPoint))
 
 		time += ht
 		#print iteration_n, " finished"
