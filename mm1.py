@@ -6,7 +6,7 @@ from numpy import linalg
 from time import sleep
 
 def validatePoint(x, y):		# возвращает true, если точка принадлежит области, определенной неравенствами 
-	if (y <= x and y >= 0 and y <= -x + 16.1):
+	if (y <= x and y >= 0 and y <= -x + 9.8):
 		return True
 	return False
 
@@ -121,8 +121,8 @@ root.title('Model')
 height = 650
 width = 1000
 max_x = 16			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
-max_y = 8
-h = 0.2
+max_y = 8 
+h = 0.1
 hr = 2 				# шаг для округления погрешности сложения (втф!!!)
 ht = 1.0			# шаг времени
 a = 1.0				# коэффициенты дифференциального уравнения
@@ -174,7 +174,7 @@ while (y <= max_y):
 		x = round(x + h, hr)
 	y = round(y + h, hr)
 
-
+print "t_idx = ", t_idx
 n = t_idx						# размер матрицы
 T = range(n)
 for i in range(n):
