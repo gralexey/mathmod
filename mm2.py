@@ -2,10 +2,10 @@
 # скрипт для ансамблирования СЛАУ и ее решения
 
 # настройки
-n = 8					# количество узлов
-segmentSize = 11		# длина рассматриваемого интервала
+n = 21					# количество узлов
+segmentSize = 11.0		# длина рассматриваемого интервала
 
-l = segmentSize / 4		# длина конечного элемента
+l = segmentSize / (n - 1)		# длина конечного элемента
 
 print "l = ", l
 # коэффициенты уравнения конечного элемента, когда известны первые производные на концах элемента
@@ -59,12 +59,7 @@ F[n-1] += deriv2
 
 # учет u0 в F
 for i in range(1, n):
-	F[i] += T[i][0]*u0 
-
-# учет u_end в F
-#for i in range(0, n - 1):
-#	F[i] += T[i][n-1]*u0 
-#	print i	
+	F[i] -= T[i][0]*u0 
 
 #printMatrix(T, F)
 
@@ -88,8 +83,9 @@ root.title('Model')
 scale_k = 50
 height = 500
 width = 600
+minus_height = 200
 
-c = Canvas(root, height=height, width=width)
+c = Canvas(root, height=height+minus_height, width=width)
 c.pack()
 
 def drawPoint(x, y, w,color):	
@@ -113,9 +109,12 @@ while(x <= 11):
 	drawPoint(x, f(x), 1,'red')
 	x += 0.01
 
+# отрисовка полученного решения
 drawPoint(0, u0, 7,'green')
 for i in range(1, n):
-	print i
-	drawPoint(i*l, U[i - 1], 7,'green')
+	x = i*l
+	#print i*l, "\t\t:\t\t", U[i - 1]
+	print "%f.3\t: %f.3\t diff: %f" % (x, U[i - 1], abs(f(x) - U[i - 1]))
+	drawPoint(x, U[i - 1], 7,'green')
 
 mainloop()
