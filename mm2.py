@@ -7,7 +7,7 @@ segmentSize = 11.0		# длина рассматриваемого интерва
 
 l = segmentSize / (n - 1)		# длина конечного элемента
 
-print "l = ", l
+#print "l = ", l
 # коэффициенты уравнения конечного элемента, когда известны первые производные на концах элемента
 a11 = (5*l*l + 1) / l
 a12 = (5*l*l - 2) / l
@@ -72,7 +72,17 @@ F.pop(0)
 
 from numpy import linalg
 U = linalg.solve(T, F)
-print u0, U
+#print U
+
+# тест солвера слау
+total_error = 0
+for i in range(n-1):
+	sum = 0
+	for j in range(n-1):
+		sum += T[i][j] * U[j]
+	local_error = abs(F[i] - sum)
+	total_error += local_error
+print "total_error: ", total_error
 
 # графика
 from Tkinter import *
@@ -93,7 +103,7 @@ def drawPoint(x, y, w,color):
 	y = y * scale_k
 	x_p = 2 + x
 	y_p = height - 2 - y	
-	c.create_oval(x_p, y_p, x_p + w, y_p + w, outline=color)
+	c.create_oval(x_p, y_p, x_p + w, y_p + w, outline=color, fill=color)
 
 def f(x):
 	return 2*(10**(-20))*exp(4*x) + 9.73*exp(-4*x) + 0.27
@@ -114,7 +124,7 @@ drawPoint(0, u0, 7,'green')
 for i in range(1, n):
 	x = i*l
 	#print i*l, "\t\t:\t\t", U[i - 1]
-	print "%f.3\t: %f.3\t diff: %f" % (x, U[i - 1], abs(f(x) - U[i - 1]))
+	#print "%f.3\t: %f.3\t diff: %f" % (x, U[i - 1], abs(f(x) - U[i - 1]))
 	drawPoint(x, U[i - 1], 7,'green')
 
 mainloop()
