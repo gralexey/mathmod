@@ -6,7 +6,7 @@ from numpy import linalg
 from time import sleep
 
 def validatePoint(x, y):		# возвращает true, если точка принадлежит области, определенной неравенствами 
-	if (y <= x and y >= 0 and y <= -x + 9.8):
+	if (y <= x and y >= 0 and y <= -x + 16.1):
 		return True
 	return False
 
