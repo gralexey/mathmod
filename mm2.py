@@ -2,7 +2,7 @@
 # скрипт для ансамблирования СЛАУ и ее решения
 
 # настройки
-n = 21					# количество узлов
+n = 41					# количество узлов
 segmentSize = 11.0		# длина рассматриваемого интервала
 
 l = segmentSize / (n - 1)		# длина конечного элемента
@@ -10,8 +10,8 @@ l = segmentSize / (n - 1)		# длина конечного элемента
 #print "l = ", l
 # коэффициенты уравнения конечного элемента, когда известны первые производные на концах элемента
 a11 = (5*l*l + 1) / l
-a12 = (5*l*l - 2) / l
-a21 = (5*l*l - 2) / l
+a12 = (5*l*l - 2) / (2*l)
+a21 = (5*l*l - 2) / (2*l)
 a22 = (5*l*l + 1) / l
 
 b1 = 2*l
@@ -75,14 +75,14 @@ U = linalg.solve(T, F)
 #print U
 
 # тест солвера слау
-total_error = 0
-for i in range(n-1):
-	sum = 0
-	for j in range(n-1):
-		sum += T[i][j] * U[j]
-	local_error = abs(F[i] - sum)
-	total_error += local_error
-print "total_error: ", total_error
+#total_error = 0
+#for i in range(n-1):
+#	sum = 0
+#	for j in range(n-1):
+#		sum += T[i][j] * U[j]
+#	local_error = abs(F[i] - sum)
+#	total_error += local_error
+#print "total_error: ", total_error
 
 # графика
 from Tkinter import *
@@ -93,7 +93,7 @@ root.title('Model')
 scale_k = 50
 height = 500
 width = 600
-minus_height = 200
+minus_height = 0
 
 c = Canvas(root, height=height+minus_height, width=width)
 c.pack()
@@ -111,7 +111,7 @@ def f(x):
 y = 0.0
 while(y <= 11):
 	drawPoint(0, y, 1,'black')
-	y += 0.1
+	y += 0.01
 
 x = 0.0
 while(x <= 11):
@@ -124,7 +124,7 @@ drawPoint(0, u0, 7,'green')
 for i in range(1, n):
 	x = i*l
 	#print i*l, "\t\t:\t\t", U[i - 1]
-	#print "%f.3\t: %f.3\t diff: %f" % (x, U[i - 1], abs(f(x) - U[i - 1]))
+	print "%f.3\t: %f.3\t diff: %f" % (x, U[i - 1], abs(f(x) - U[i - 1]))
 	drawPoint(x, U[i - 1], 7,'green')
 
 mainloop()
