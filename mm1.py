@@ -6,7 +6,7 @@ from numpy import linalg
 from time import sleep
 
 def validatePoint(x, y):		# возвращает true, если точка принадлежит области, определенной неравенствами 
-	if (y <= x and y >= 0 and y <= -x + 16.1):
+	if (y <= 6 and y >= 0 and x <= 8 and x >=0 and y <= - x + 11.1):
 		return True
 	return False
 
@@ -38,11 +38,11 @@ def drawBoldPoint(x, y, color):
 def drawBounds():				# рисуем границы для рабочего прямоугольника (0, 0, max_x, max_y) и координатные оси
 	x = 0.0
 	while (x <= max_x):
-		drawPoint(x, max_y, "green")
+		#drawPoint(x, max_y, "green")
 		x = x + 0.1
 	y = 0.0
 	while (y <= max_y):
-		drawPoint(max_x, y, "green")
+		#drawPoint(max_x, y, "green")
 		y = y + 0.1
 	c.create_line(20, height - 20, width - 20, height - 20)
 	c.create_line(20, height - 20, 20, 20)
@@ -64,7 +64,7 @@ def defineTopCondiments():
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 100
+				temperatureIn_t_idx[t_border] = 50
 				break						
 			y = round(y - h, hr)
 		x = round(x + h, hr)
@@ -79,7 +79,7 @@ def defineBottomCondiments():
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 50
+				temperatureIn_t_idx[t_border] = 200
 				break						
 			y = round(y + h, hr)
 		x = round(x + h, hr)
@@ -94,7 +94,7 @@ def defineRightCondiments():
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 100
+				temperatureIn_t_idx[t_border] = 50
 				break						
 			x = round(x - h, hr)
 		y = round(y + h, hr)
@@ -232,10 +232,10 @@ def doLoop():
 				x = round(x + h, hr)
 			y = round(y + h, hr)
 
-		#defineRightCondiments()
+		defineRightCondiments()
 		defineBottomCondiments()
 		defineTopCondiments()
-		#defineLeftCondiments()
+		defineLeftCondiments()
 
 		# задаем граничные температуры точек в матрице 
 		for idx in temperatureIn_t_idx:
@@ -253,7 +253,7 @@ def doLoop():
 			pointXY = xyt[0]	
 			t_Idx = xyt[1]	
 			tOfPoint = t[t_Idx]
-			tOfPoint = (tOfPoint - 50) * 2
+			tOfPoint = tOfPoint / 2
 			drawCircle(pointXY[0], pointXY[1], scale_k * 2 + 40, getColorByScalar(tOfPoint))
 
 		time += ht
