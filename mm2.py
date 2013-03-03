@@ -1,16 +1,29 @@
 # -*- coding: utf8 -*-
 # скрипт для ансамблирования глобальной матрицы жесткости и решения СЛАУ
 
+import sys
+
 # настройки
 n = 41					# количество узлов
+form = 1 								# 3 — кубическая функция формы, 1 — линейная функция формы
+
+if len(sys.argv) == 3:
+	n = int(sys.argv[1])
+	form = int(sys.argv[2])
+	if form != 1 and form != 3:
+		exit('wrong form choice')
+else:
+	print "give first arg n, second — form (1 or 3)"
+	exit()
+
 segmentSize = 11.0		# длина рассматриваемого интервала
 
 l = segmentSize / (n - 1)		# длина конечного элемента
 
-print "l = ", l
+print "l = ", l, "n = ", n, "form: ", form
 # коэффициенты уравнения конечного элемента, когда известны первые производные на концах элемента
 
-form = 3 								# 3 — кубическая функция формы, 1 — линейная функция формы
+
 if form == 1:
 	a11 = (5*l*l + 1) / l
 	a12 = (5*l*l - 2) / (2*l)
@@ -119,8 +132,11 @@ def drawPoint(x, y, w,color):
 	y_p = height - 2 - y	
 	c.create_oval(x_p - ex, y_p - ex, x_p + w - ex, y_p + w - ex, outline=color, fill=color)
 
+#def f(x):
+#	return 2*(10**(-20))*exp(4*x) + 9.73*exp(-4*x) + 0.27
+
 def f(x):
-	return 2*(10**(-20))*exp(4*x) + 9.73*exp(-4*x) + 0.27
+	return (1/(15*(1 + exp(22*sqrt(15)))) ) * exp(-sqrt(15) * x) * (4*exp(sqrt(15)*x) + 146*exp(2*sqrt(15)*x) + 4*exp(sqrt(15)*(x+22)) + sqrt(15)*exp(sqrt(15)*(2*x+11)) - sqrt(15)*exp(11*sqrt(15)) + 146*exp(22*sqrt(15)))
 
 y = 0.0
 while(y <= 11):
@@ -133,12 +149,18 @@ while(x <= 11):
 	drawPoint(x, f(x), 1,'red')
 	x += 0.01
 
-# отрисовка полученного решения
-drawPoint(0, u0, 7,'green')
+# отрисовка полученного решения и вывод численного решения
+maxErr = 0.0
+idxWithMaxErr = -1
+drawPoint(0.5, u0, 7,'green')
 for i in range(1, n):
 	x = i*l
-	#print i*l, "\t\t:\t\t", U[i - 1]
-	print "%f.3\t: %f.3\t diff: %f" % (x, U[i - 1], abs(f(x) - U[i - 1]))
+	currErr = abs(f(x) - U[i - 1])
+	if currErr > maxErr:
+		maxErr = currErr
+		idxWithMaxErr = i
+	print "x: %f\tf: %f.3\tu: %f.3\t\tdiff: %f" % (x, f(x), U[i - 1], currErr)
 	drawPoint(x, U[i - 1], 7,'green')
+print "maxErr: ", maxErr
 
 mainloop()
