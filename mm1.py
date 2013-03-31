@@ -215,7 +215,6 @@ while (y <= max_y):
 		x = round(x + h, hr)
 	y = round(y + h, hr)
 
-print "t_idx = ", t_idx
 n = t_idx						# размер матрицы
 T = range(n)
 for i in range(n):
@@ -230,7 +229,6 @@ F = range(n)
 for i in range(n):
 	F[i] = 0
 
-print "matrix size: ", n
 tOfCurrentIterations = [start_temperature] * n 		# start_temperature — начальная температура во всех точках
 tStore = []
 tStore.append(tOfCurrentIterations)
@@ -239,7 +237,7 @@ tStore.append(tOfCurrentIterations)
 def doLoop():
 	time = 0.0
 	iteration_n = 0     # номер итерации (как time, только целое число)
-	while (time <= 25):
+	while (time <= 20):
 		rowCount = 0
 		x = 0.0
 		y = 0.0
@@ -273,17 +271,13 @@ def doLoop():
 				x = round(x + h, hr)
 			y = round(y + h, hr)
 
-		#print "rowCount before: ", rowCount
 		defineRightTopCondiments()
 		rowCount = defineRightBottomInsulationCondiments(rowCount)
 		defineTopCondiments()
 		defineLeftCondiments()
 		rowCount = defineBottomInsulationCondiments(rowCount)
-		#print "rowCount after: ", rowCount
 
-
-		#print "temperatureIn_t_idx size: ", len(temperatureIn_t_idx)
-		# задаем граничные температуры точек в матрице 
+			# задаем граничные температуры точек в матрице 
 		for idx in temperatureIn_t_idx:
 			#print "rowCount:", rowCount, " matrix size: ", len(T), " idx: ", idx
 			T[rowCount][idx] = 1
@@ -305,10 +299,8 @@ def doLoop():
 			drawCircle(pointXY[0], pointXY[1], scale_k * 2 + 40, getColorByScalar(tOfPoint))
 
 		time += ht
-		#print iteration_n, " finished"
 		#sleep(0.1)
 		root.update()
-		#print tStore[iteration_n], " ", iteration_n, " finished"		
 		iteration_n += 1
 
 #	for i in range(10):							# эксперимент с индикацией температуры в точке
