@@ -6,7 +6,7 @@ from numpy import linalg
 from time import sleep
 
 def validatePoint(x, y):		# возвращает true, если точка принадлежит области, определенной неравенствами 
-	if (y <= x and y >= 0 and y <= -x + 16.1):
+	if (x >= 0 and y >= 0 and x <= 4 and y <= 8):
 		return True
 	return False
 
@@ -64,7 +64,7 @@ def defineTopCondiments():
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 100
+				temperatureIn_t_idx[t_border] = 300
 				break						
 			y = round(y - h, hr)
 		x = round(x + h, hr)
@@ -79,25 +79,65 @@ def defineBottomCondiments():
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 50
+				temperatureIn_t_idx[t_border] = 10
 				break						
 			y = round(y + h, hr)
 		x = round(x + h, hr)
 
-def defineRightCondiments():
-	# задаем граничные условия с правой стороны фигуры
+def defineRightTopCondiments():						
+	# задаем граничные условия с правой стороны фигуры (верхняя половина)
 	x = max_x
-	y = 0.0
+	y = max_y / 2
 	while (y <= max_y):
 		x = max_x
 		while (x >= 0):
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 100
+				temperatureIn_t_idx[t_border] = 300
 				break						
 			x = round(x - h, hr)
 		y = round(y + h, hr)
+
+def defineRightBottomInsulationCondiments(rowCount):
+	# задаем граничные условия (2 рода) с правой стороны фигуры (нижняя половина)
+	x = max_x
+	y = 0
+	while (y < max_y / 2):	# "<" вместо "<=" чтобы не было избыточного уравнения
+		x = max_x
+		while (x >= 0):
+			if validatePoint(x, y):				
+				t_border = xyt_dict[x, y]
+				t_underborder = xyt_dict[round(x - h, hr), y]		# точка рядом с границей
+				T[rowCount][t_border] = 1
+				T[rowCount][t_underborder] = -1
+				F[rowCount] = 0
+				rowCount += 1
+				break						
+			x = round(x - h, hr)
+		y = round(y + h, hr)
+	return rowCount
+
+def defineBottomInsulationCondiments(rowCount):
+	# задаем граничные условия с нижней стороны фигуры
+	x = h #0.0 					# чтобы не было избыточного уравнения
+	y = 0.0
+	while (x < max_x):			# "<" вместо "<=" чтобы не было избыточного уравнения
+		y = 0.0
+		while (y <= max_y):
+			#print "processing x, y: ", x, y
+			if validatePoint(x, y):
+				#print "validated x, y: ", x, y
+				t_border = xyt_dict[x, y]
+				t_underborder = xyt_dict[x, round(y + h, hr)]		# точка рядом с границей
+				T[rowCount][t_border] = 1
+				T[rowCount][t_underborder] = -1
+				F[rowCount] = 0
+				rowCount += 1
+				break						
+			y = round(y + h, hr)
+		x = round(x + h, hr)
+	return rowCount
 
 def defineLeftCondiments():
 	# задаем граничные условия с левой стороны фигуры
@@ -109,7 +149,7 @@ def defineLeftCondiments():
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 200
+				temperatureIn_t_idx[t_border] = 300
 				break						
 			x = round(x + h, hr)
 		y = round(y + h, hr)
@@ -118,9 +158,9 @@ root = Tk()
 root.title('Model')
 
 # настройки
-height = 650
-width = 1000
-max_x = 16			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
+height = 600
+width = 400
+max_x = 4			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
 max_y = 8 
 h = 0.2
 hr = 2 				# шаг для округления погрешности сложения (втф!!!)
@@ -128,6 +168,7 @@ ht = 1.0			# шаг времени
 a = 1.0				# коэффициенты дифференциального уравнения
 b = 1.0				
 scale_k = 60
+start_temperature = 50.0
 
 c = Canvas(root, height=height, width=width)
 c.pack()
@@ -190,7 +231,7 @@ for i in range(n):
 	F[i] = 0
 
 print "matrix size: ", n
-tOfCurrentIterations = [0.0] * n 		# 0.0 — начальная температура во всех точках
+tOfCurrentIterations = [start_temperature] * n 		# start_temperature — начальная температура во всех точках
 tStore = []
 tStore.append(tOfCurrentIterations)
 #print tStore
@@ -232,16 +273,23 @@ def doLoop():
 				x = round(x + h, hr)
 			y = round(y + h, hr)
 
-		#defineRightCondiments()
-		defineBottomCondiments()
+		#print "rowCount before: ", rowCount
+		defineRightTopCondiments()
+		rowCount = defineRightBottomInsulationCondiments(rowCount)
 		defineTopCondiments()
-		#defineLeftCondiments()
+		defineLeftCondiments()
+		rowCount = defineBottomInsulationCondiments(rowCount)
+		#print "rowCount after: ", rowCount
 
+
+		#print "temperatureIn_t_idx size: ", len(temperatureIn_t_idx)
 		# задаем граничные температуры точек в матрице 
 		for idx in temperatureIn_t_idx:
+			#print "rowCount:", rowCount, " matrix size: ", len(T), " idx: ", idx
 			T[rowCount][idx] = 1
 			F[rowCount] = temperatureIn_t_idx[idx]
 			rowCount += 1
+		
 
 		t = linalg.solve(T, F)		# t содержит значения температур элементов (последовательно)
 		tStore.append(t)
@@ -253,7 +301,7 @@ def doLoop():
 			pointXY = xyt[0]	
 			t_Idx = xyt[1]	
 			tOfPoint = t[t_Idx]
-			tOfPoint = (tOfPoint - 50) * 2
+			tOfPoint = tOfPoint / 3.0 
 			drawCircle(pointXY[0], pointXY[1], scale_k * 2 + 40, getColorByScalar(tOfPoint))
 
 		time += ht
