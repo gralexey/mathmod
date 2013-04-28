@@ -6,7 +6,7 @@ from numpy import linalg
 from time import sleep
 
 def validatePoint(x, y):		# возвращает true, если точка принадлежит области, определенной неравенствами 
-	if (x >= 0 and y >= 0 and x <= 4 and y <= 8):
+	if (x >= 0 and y >= 0 and x <= 3 and y <= 12):
 		return True
 	return False
 
@@ -14,8 +14,9 @@ def drawPoint(x, y, color):
 	x = x * scale_k			# масштабирование
 	y = y * scale_k
 	x_p = 20 + x
-	y_p = height - 20 - y	
-	c.create_rectangle(x_p, y_p, x_p, y_p, outline=color)
+	y_p = height - 20 - y
+
+	c.create_rectangle(x_p, y_p, x_p , y_p, outline=color)
 
 def drawCircle(x, y, temperature, color):	
 	x = x * scale_k			# масштабирование
@@ -25,7 +26,11 @@ def drawCircle(x, y, temperature, color):
 	#color = "#%06x" % int(temperature * (16711680 - 255) / (200 - 0) + 255)
 	#color = color[:3] + "00" + color[5:]
 	#radius = h * 10
-	radius = temperature * h * 35 / 200
+	if h < 0.2 and h > 0.1:
+		d = 0.5
+	else:
+		d = 0
+	radius = temperature * h * 35 / 200 + d
 	c.create_rectangle(x_p - radius, y_p - radius, x_p + radius, y_p + radius, fill=color, width=0)
 
 def drawBoldPoint(x, y, color):	
@@ -52,9 +57,10 @@ def printMatrix(a, b):
 	for row in a:
 		print row, b[idx]
 		idx += 1
+	print ""
 
 temperatureIn_t_idx = {}
-def defineTopCondiments():
+def defineTopCondiments(t):
 	# задаем граничные условия с верхней стороны фигуры
 	x = 0.0
 	y = max_y
@@ -64,63 +70,48 @@ def defineTopCondiments():
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 300
+				temperatureIn_t_idx[t_border] = t
 				break						
 			y = round(y - h, hr)
 		x = round(x + h, hr)
 
-def defineBottomCondiments():
-	# задаем граничные условия с нижней стороны фигуры
-	x = 0.0
-	y = 0.0
-	while (x <= max_x):
-		y = 0.0
-		while (y <= max_y):
-			if validatePoint(x, y):
-				t_border = xyt_dict[x, y]
-				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 10
-				break						
-			y = round(y + h, hr)
-		x = round(x + h, hr)
-
-def defineRightTopCondiments():						
-	# задаем граничные условия с правой стороны фигуры (верхняя половина)
+def defineRightCondiments(t):						
+	# задаем граничные условия с правой стороны фигуры
 	x = max_x
-	y = max_y / 2
+	y = 0
 	while (y <= max_y):
 		x = max_x
 		while (x >= 0):
 			if validatePoint(x, y):
 				t_border = xyt_dict[x, y]
 				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 300
+				temperatureIn_t_idx[t_border] = t
 				break						
 			x = round(x - h, hr)
 		y = round(y + h, hr)
 
-def defineRightBottomInsulationCondiments(rowCount):
+def defineLeftInsulationCondiments(rowCount):
 	# задаем граничные условия (2 рода) с правой стороны фигуры (нижняя половина)
-	x = max_x
-	y = 0
-	while (y < max_y / 2):	# "<" вместо "<=" чтобы не было избыточного уравнения
-		x = max_x
-		while (x >= 0):
+	x = 0
+	y = h
+	while (y < max_y):	# "<" вместо "<=" чтобы не было избыточного уравнения
+		x = 0
+		while (x <= max_x):
 			if validatePoint(x, y):				
 				t_border = xyt_dict[x, y]
-				t_underborder = xyt_dict[round(x - h, hr), y]		# точка рядом с границей
+				t_underborder = xyt_dict[round(x + h, hr), y]		# точка рядом с границей
 				T[rowCount][t_border] = 1
 				T[rowCount][t_underborder] = -1
 				F[rowCount] = 0
 				rowCount += 1
 				break						
-			x = round(x - h, hr)
+			x = round(x + h, hr)
 		y = round(y + h, hr)
 	return rowCount
 
 def defineBottomInsulationCondiments(rowCount):
 	# задаем граничные условия с нижней стороны фигуры
-	x = h #0.0 					# чтобы не было избыточного уравнения
+	x = 0.0 					# чтобы не было избыточного уравнения
 	y = 0.0
 	while (x < max_x):			# "<" вместо "<=" чтобы не было избыточного уравнения
 		y = 0.0
@@ -139,36 +130,21 @@ def defineBottomInsulationCondiments(rowCount):
 		x = round(x + h, hr)
 	return rowCount
 
-def defineLeftCondiments():
-	# задаем граничные условия с левой стороны фигуры
-	x = 0.0
-	y = 0.0
-	while (y <= max_y):
-		x = 0.0
-		while (x <= max_x):
-			if validatePoint(x, y):
-				t_border = xyt_dict[x, y]
-				global temperatureIn_t_idx
-				temperatureIn_t_idx[t_border] = 300
-				break						
-			x = round(x + h, hr)
-		y = round(y + h, hr)
-
 root = Tk()
 root.title('Model')
 
 # настройки
-height = 600
-width = 400
-max_x = 4			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
-max_y = 8 
+height = 800
+width = 300
+max_x = 3			# определяет рабочий прямоугольник для работы (0, 0, max_x, max_y)
+max_y = 12 
 h = 0.2
 hr = 2 				# шаг для округления погрешности сложения (втф!!!)
 ht = 1.0			# шаг времени
 a = 1.0				# коэффициенты дифференциального уравнения
 b = 1.0				
 scale_k = 60
-start_temperature = 50.0
+start_temperature = -20.0
 
 c = Canvas(root, height=height, width=width)
 c.pack()
@@ -176,8 +152,6 @@ drawBounds()
 
 
 def getColorByScalar(temperature):	
-	#temperature = (temperature - 50) * 2
-	#temperature = temperature * 0.66 + 33				# для сужения цветового диапазона
 	temperature = int(temperature)
 	if temperature == 100:
 		temperature	-= 1
@@ -223,7 +197,6 @@ for i in range(n):
 for i in range(n):
 	for j in range(n):
 		T[i][j] = 0
-
 
 F = range(n)
 for i in range(n):
@@ -271,19 +244,16 @@ def doLoop():
 				x = round(x + h, hr)
 			y = round(y + h, hr)
 
-		defineRightTopCondiments()
-		rowCount = defineRightBottomInsulationCondiments(rowCount)
-		defineTopCondiments()
-		defineLeftCondiments()
+		defineTopCondiments(200)
+		defineRightCondiments(200)
 		rowCount = defineBottomInsulationCondiments(rowCount)
+		rowCount = defineLeftInsulationCondiments(rowCount)		
 
-			# задаем граничные температуры точек в матрице 
+		# задаем граничные температуры точек в матрице 
 		for idx in temperatureIn_t_idx:
-			#print "rowCount:", rowCount, " matrix size: ", len(T), " idx: ", idx
 			T[rowCount][idx] = 1
 			F[rowCount] = temperatureIn_t_idx[idx]
 			rowCount += 1
-		
 
 		t = linalg.solve(T, F)		# t содержит значения температур элементов (последовательно)
 		tStore.append(t)
@@ -295,7 +265,7 @@ def doLoop():
 			pointXY = xyt[0]	
 			t_Idx = xyt[1]	
 			tOfPoint = t[t_Idx]
-			tOfPoint = tOfPoint / 3.0 
+			tOfPoint = (tOfPoint + 20) / 2.3 
 			drawCircle(pointXY[0], pointXY[1], scale_k * 2 + 40, getColorByScalar(tOfPoint))
 
 		time += ht
