@@ -86,19 +86,30 @@ F[n-1] += deriv2
 # учет u0 в F
 for i in range(1, n):
 	F[i] -= T[i][0]*u0 
-
-#printMatrix(T, F)
-
 for i in range (n):		# удаление первого столбца
 	T[i].pop(0)	
 T.pop(0)				# удаление первой строчки
 F.pop(0)
 
-#printMatrix(T, F)
+printMatrix(T, F)
+
+# добавление строки и столбца
+for i in range (n - 1):						# добавление столбца
+	T[i].append(0)
+T.append([0 for x in range(n)])				# добавление строчки
+F.append(0)									# добвление единичной строчки к правой части
+
+T[n - 2][n - 1] = -1
+F[n - 2] = 0
+T[n - 1][n - 2] = -1
+T[n - 1][n - 1] = 1
+F[n - 1] = 0
+
+printMatrix(T, F)
 
 from numpy import linalg
 U = linalg.solve(T, F)
-#print U
+print U
 
 # тест солвера слау
 #total_error = 0
@@ -117,8 +128,8 @@ root = Tk()
 root.title('Model')
 
 scale_k = 50
-height = 500
-width = 600
+height = 600
+width = 800
 minus_height = 0
 
 c = Canvas(root, height=height+minus_height, width=width)
@@ -135,16 +146,19 @@ def drawPoint(x, y, w,color):
 #def f(x):
 #	return 2*(10**(-20))*exp(4*x) + 9.73*exp(-4*x) + 0.27
 
-def f(x):
-	return (1/(15*(1 + exp(22*sqrt(15)))) ) * exp(-sqrt(15) * x) * (4*exp(sqrt(15)*x) + 146*exp(2*sqrt(15)*x) + 4*exp(sqrt(15)*(x+22)) + sqrt(15)*exp(sqrt(15)*(2*x+11)) - sqrt(15)*exp(11*sqrt(15)) + 146*exp(22*sqrt(15)))
+#def f(x):		# orig func
+#	return (1/(15*(1 + exp(22*sqrt(15)))) ) * exp(-sqrt(15) * x) * (4*exp(sqrt(15)*x) + 146*exp(2*sqrt(15)*x) + 4*exp(sqrt(15)*(x+22)) + sqrt(15)*exp(sqrt(15)*(2*x+11)) - sqrt(15)*exp(11*sqrt(15)) + 146*exp(22*sqrt(15)))
+
+def f(x):		# решение д.у. с граничным условием 3 рода на правой границе
+	return (2*exp(-sqrt(15)*x) * (2*exp(sqrt(15)*x) + 2*sqrt(15)*exp(sqrt(15)*x) + 73*exp(2*sqrt(15)*x) + 73*sqrt(15)*exp(2*sqrt(15)*x) - 2*exp(sqrt(15)*x+22*sqrt(15)) + 2*sqrt(15)*exp(sqrt(15)*x+22*sqrt(15)) + 2*exp(2*sqrt(15)*x+11*sqrt(15)) - 2*exp(11*sqrt(15)) - 73*exp(22*sqrt(15)) + 73*sqrt(15)*exp(22*sqrt(15)))) / (15*(1 + sqrt(15) - exp(22*sqrt(15)) + sqrt(15)*exp(22*sqrt(15))))
 
 y = 0.0
-while(y <= 11):
+while(y <= segmentSize):
 	drawPoint(0, y, 1,'black')
 	y += 0.01
 
 x = 0.0
-while(x <= 11):
+while(x <= segmentSize):
 	drawPoint(x, 0, 1,'black')
 	drawPoint(x, f(x), 1,'red')
 	x += 0.01
@@ -152,7 +166,7 @@ while(x <= 11):
 # отрисовка полученного решения и вывод численного решения
 maxErr = 0.0
 idxWithMaxErr = -1
-drawPoint(0.5, u0, 7,'green')
+drawPoint(0, u0, 7,'green')
 for i in range(1, n):
 	x = i*l
 	currErr = abs(f(x) - U[i - 1])
